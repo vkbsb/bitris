@@ -88,7 +88,7 @@ class BitPattern(cocos.layer.Layer):
         super(BitPattern, self).__init__()
         w,h = director.get_window_size()
         bitSize = w/numBits
-        self.bits = [ Square(self.Color4B24F(BitPattern.colors[i]), i*bitSize, 0, bitSize) for i in range(0,numBits) ]
+        self.bits = [ Square(self.Color4B24F(BitPattern.colors[i]), w-(i+1)*bitSize, 0, bitSize) for i in range(0,numBits) ]
         for i in range(0, numBits):
             self.bits[i].setBitNumber(i)
             self.add(self.bits[i])
@@ -97,6 +97,15 @@ class BitPattern(cocos.layer.Layer):
     def toggleBit(self, bitNum):
         self.bits[bitNum].layer_color = (0, 0, 0, 0)
         self.bits[bitNum].label.element.color = (255, 255, 255, 255)
+
+    def getValue(self):
+        value = 0
+        for bit in self.bits:
+            if bit.isBitOn():
+                bitpos = 1
+                bitpos = bitpos << bit.bitNum
+                value = value | bitpos
+        return value
 
     def handleClick(self, x, y):
         for i in range(0, len(self.bits)):
