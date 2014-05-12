@@ -15,7 +15,7 @@ class Square(cocos.layer.Layer):
         self.layer_color = color
         self.bitNum = 0
         self.label = cocos.text.Label('0',
-                                 font_name='Times New Roman',
+                                 font_name='Nokia Cellphone',
                                  font_size=20,
                                  anchor_x='center', anchor_y='center')
         self.label.element.color = (0, 0, 0, 150)
