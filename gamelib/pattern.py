@@ -98,6 +98,13 @@ class BitPattern(cocos.layer.Layer):
         self.bits[bitNum].layer_color = (0, 0, 0, 0)
         self.bits[bitNum].label.element.color = (255, 255, 255, 255)
 
+    def getNumBitsOn(self):
+        value = 0
+        for bit in self.bits:
+            if bit.isBitOn():
+                value += 1
+        return value
+
     def getValue(self):
         value = 0
         for bit in self.bits:
