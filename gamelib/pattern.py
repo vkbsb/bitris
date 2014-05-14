@@ -1,6 +1,7 @@
 import cocos
 from cocos.director import director
 from pyglet import gl
+import random
 
 # Defining a new layer type...
 class Square(cocos.layer.Layer):
@@ -93,6 +94,13 @@ class BitPattern(cocos.layer.Layer):
             self.bits[i].setBitNumber(i)
             self.add(self.bits[i])
         self.position = 0, h-bitSize
+
+    def shuffleBits(self):
+        random.shuffle(self.bits)
+        w,h = director.get_window_size()
+        bitSize = w/len(self.bits)
+        for i in xrange(len(self.bits)):
+            self.bits[i].position = w-(i+1)*bitSize, 0
 
     def toggleBit(self, bitNum):
         self.bits[bitNum].layer_color = (0, 0, 0, 0)
