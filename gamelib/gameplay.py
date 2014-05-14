@@ -4,6 +4,7 @@ import cocos.particle_systems
 import cocos.actions
 import cocos.sprite
 from cocos.director import director
+import powerups
 import pattern
 import results
 from vfx import *
@@ -94,9 +95,10 @@ class GamePlay(cocos.layer.Layer):
         for i in xrange(3):
             self.powerMenu[i].scale = 0.8
             self.powerMenu[i].position = itemSize/2 + i*itemSize, 72/2
-            self.powerMenu[i].count = i #TODO load the numbers from inventory
+            self.powerMenu[i].count = i + 1#TODO load the numbers from inventory
             self.add(self.powerMenu[i])
 
+        #self.bitpattern.shuffleBits()
         # #create the menu for powerups.
         # menu = cocos.menu.Menu()
         # positions = []
@@ -125,7 +127,7 @@ class GamePlay(cocos.layer.Layer):
         self.successCounter = 0
         self.isAnimating = False
         self.score = 0
-        self.startMutation = False
+        self.startMutation = 0
         self.isGameOver = False
         self.genLimit = 10
         self.delayTime = 1
@@ -139,6 +141,17 @@ class GamePlay(cocos.layer.Layer):
         self.currentTarget = random.randrange(0, self.genLimit)
         self.label.element.text = "Return: " + str(self.currentTarget)
         self.bitpattern = pattern.BitPattern(GamePlay.BitPatternSize)
+
+        if self.startMutation and random.choice([0, 0, 1]):
+            self.bitpattern.shuffleBits()
+            self.startMutation -= 1
+            #show a message that indicates that a powerup has been launched.
+            mutationmsg = createLabel("Bit Mutation Detected", 18, (255, 0, 0, 255))
+            mutationmsg.position = self.w/2, self.h/2 + 72
+            mutationmsg.do(cocos.actions.Blink(2, 1) +
+                          cocos.actions.FadeOut(0.5) + cocos.actions.CallFunc(mutationmsg.kill))
+            self.add(mutationmsg, 2)
+
         self.add(self.bitpattern)
         move = cocos.actions.MoveBy((0, -self.bitSize), 0.5)
         delay = cocos.actions.Delay(self.delayTime)
@@ -168,10 +181,12 @@ class GamePlay(cocos.layer.Layer):
         self.multiplier = 1
         self.updateScoreText()
 
-    def handleSuccess(self, node):
+    def handleSuccess(self, node = None):
         self.isAnimating = False
         self.generateNextPattern()
-        node.do(cocos.actions.FadeOut(0.5) + cocos.actions.CallFuncS(self.remove))
+
+        if node:
+            node.do(cocos.actions.FadeOut(0.5) + cocos.actions.CallFuncS(self.remove))
         # successcounter
         self.successCounter += 1
         self.multiplier += 1
@@ -187,9 +202,14 @@ class GamePlay(cocos.layer.Layer):
         #decrement the time for every 10 correct answers.
         if(self.successCounter % 10 == 0):
             self.delayTime -= 0.1
+
+            #start the mutation gameplay as well.
+            self.startMutation = self.successCounter % 10;
+
             #TODO decide when to shuffle the bits.
             if self.delayTime < 0.5:
                 self.delayTime = 0.5
+
 
         self.updateScoreText()
 
@@ -282,13 +302,30 @@ class GamePlay(cocos.layer.Layer):
         self.label.element.text = "" + str(x)  + "," + str(y)
 
     def activate_powerup(self, fname):
-        #TODO implment the powerups.
+        msg = "AutoByte Launched"
+        self.isAnimating = True
         if fname == "AutoByte.png":
-            print "AutoByte Launched"
+            msg = "AutoByte Launched"
+            powerups.AutoByte(self.bitpattern, self.currentTarget)
+
         elif fname == "BitAndOrder.png":
-            print "BitAndOrder Launched"
+            msg = "BitAndOrder Launched"
+            self.bitpattern.do(cocos.actions.Delay(2) +
+                               cocos.actions.CallFuncS(powerups.BitAndOrder))
+
         elif fname == "ByteBlast.png":
-            print "ByteBlater Launched"
+            msg = "ByteBlater Launched"
+            self.multiplier = 1
+            self.bitpattern.do(cocos.actions.Delay(2) +
+                               cocos.actions.CallFuncS(powerups.ByteBlaster))
+
+        #show a message that indicates that a powerup has been launched.
+        powerupmsg = createLabel(msg, 18, (0, 0, 255, 255))
+        powerupmsg.position = self.w/2, self.h/2 + 72
+        powerupmsg.do(cocos.actions.Blink(2, 1) +
+                      cocos.actions.FadeOut(0.5) + cocos.actions.CallFunc(powerupmsg.kill))
+        self.add(powerupmsg, 3)
+
 
     def on_mouse_motion(self, sx, sy, dx, dy):
         #handle the mouse over effect.
@@ -299,7 +336,7 @@ class GamePlay(cocos.layer.Layer):
                 item.scale = 0.8
 
     def on_mouse_press(self, x, y, buttons, modifiers):
-        if self.isGameOver:
+        if self.isGameOver or self.isAnimating:
             pass
         else:
             #handle the mouse click to activate the powerup.

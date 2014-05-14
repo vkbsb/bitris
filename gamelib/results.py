@@ -18,6 +18,7 @@ class Results(cocos.layer.Layer):
                          font_size=18,
                          anchor_x='left', anchor_y='center')
             valuemsg.position = w/2, h - (i+5)*10
+
             i += 2
             self.add(keymsg)
             self.add(valuemsg)
