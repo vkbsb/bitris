@@ -1,0 +1,16 @@
+{"userdata": {"ByteBlast": 2, "BitAndOrder": 0, "CpuCycles": 112, "AutoByte": 1},
+"gameconfig": {
+"BitAndOrder": {
+ "cost" : 40,
+ "info" : "Re-Orders' bits in a Byte"
+},
+"ByteBlast": {
+    "cost": 30,
+    "info": "System ignores the Byte"
+},
+"AutoByte":{
+    "cost" : 50,
+    "info" : "Returns correct Answer"
+}
+}
+}

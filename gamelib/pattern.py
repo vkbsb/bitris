@@ -79,7 +79,7 @@ class BitPattern(cocos.layer.Layer):
         (255, 0, 0, 255),
         (170, 0, 0, 255),
         (128, 0, 0, 255),
-        (85, 0, 0, 220)
+        (85, 0, 0, 255)
     ]
 
     def Color4B24F(self, color4B):

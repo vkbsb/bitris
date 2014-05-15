@@ -3,6 +3,39 @@ from vfx import *
 from cocos.particle import *
 from cocos.actions import *
 
+class PowerUpIndicator(cocos.sprite.Sprite):
+    def __init__(self, image, callback):
+        super(PowerUpIndicator, self).__init__(image)
+        self.file_name = image
+        self._count = 2
+        self.callback = callback
+        self.label = createLabel(str(self.count), 24)
+        self.label.position = (-self.width/2, 10)
+        self.label.element.color = (0, 0, 0, 118)
+        self.label.element.anchor_x = 'right'
+        self.add(self.label)
+
+    def activate(self):
+        if self.count > 0:
+            self.do(cocos.actions.RotateBy(10, 0.1) + cocos.actions.RotateBy(-20, 0.1) + cocos.actions.RotateBy(10,0.1))
+            self.count -= 1
+            self.callback(self.file_name)
+
+    def _set_count(self, c):
+        self._count = c
+        self.label.element.text = str(self._count)
+
+    def _get_count(self):
+        return self._count
+
+    count = property(_get_count, _set_count, doc='indicates the number of powerups available')
+
+    def _set_scale( self, s ):
+        super(PowerUpIndicator, self)._set_scale(s)
+
+        if hasattr(self, 'label'):
+            self.label.position = (-self.width/2, -self.height/2)
+
 def ByteBlaster( bitpattern ):
     """
     Eliminates on coming byte and launches a new pattern.

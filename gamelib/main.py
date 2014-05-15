@@ -8,6 +8,7 @@ package.
 
 import data
 import gameplay
+import mainmenu
 import cocos
 
 def main():
@@ -17,7 +18,7 @@ def main():
     cocos.director.director.init(320, 480)
 
     # We create a new layer, an instance of HelloWorld
-    hello_layer = gameplay.GamePlay()
+    hello_layer = mainmenu.MainMenu() #gameplay.GamePlay()
 
     # A scene that contains the layer hello_layer
     main_scene = cocos.scene.Scene (hello_layer)

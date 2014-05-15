@@ -8,49 +8,9 @@ import powerups
 import pattern
 import results
 from vfx import *
+from powerups import PowerUpIndicator
+import gamelib
 import data
-
-def createLabel(msg, fontsize = 18, color = (255, 0, 0, 255)):
-    errormsg = cocos.text.Label(msg,
-                        font_name='Nokia Cellphone',
-                         font_size=fontsize,
-                         anchor_x='center', anchor_y='center')
-    errormsg.element.color = color
-    return errormsg
-
-
-class PowerUpIndicator(cocos.sprite.Sprite):
-    def __init__(self, image, callback):
-        super(PowerUpIndicator, self).__init__(image)
-        self.file_name = image
-        self._count = 2
-        self.callback = callback
-        self.label = createLabel(str(self.count), 24)
-        self.label.position = (-self.width/2, 10)
-        self.label.element.color = (0, 0, 0, 118)
-        self.label.element.anchor_x = 'right'
-        self.add(self.label)
-
-    def activate(self):
-        if self.count > 0:
-            self.do(cocos.actions.RotateBy(10, 0.1) + cocos.actions.RotateBy(-20, 0.1) + cocos.actions.RotateBy(10,0.1))
-            self.count -= 1
-            self.callback(self.file_name)
-
-    def _set_count(self, c):
-        self._count = c
-        self.label.element.text = str(self._count)
-
-    def _get_count(self):
-        return self._count
-
-    count = property(_get_count, _set_count, doc='indicates the number of powerups available')
-
-    def _set_scale( self, s ):
-        super(PowerUpIndicator, self)._set_scale(s)
-
-        if hasattr(self, 'label'):
-            self.label.position = (-self.width/2, -self.height/2)
 
 class GamePlay(cocos.layer.Layer):
     is_event_handler = True  #: enable director.window events
@@ -92,27 +52,12 @@ class GamePlay(cocos.layer.Layer):
         self.powerMenu.append(PowerUpIndicator('BitAndOrder.png', self.activate_powerup))
         self.powerMenu.append(PowerUpIndicator('ByteBlast.png', self.activate_powerup))
         itemSize = self.w/3
+
         for i in xrange(3):
             self.powerMenu[i].scale = 0.8
             self.powerMenu[i].position = itemSize/2 + i*itemSize, 72/2
-            self.powerMenu[i].count = i + 1#TODO load the numbers from inventory
+            self.powerMenu[i].count = gamelib.Inventory.data['userdata'][self.powerMenu[i].file_name.replace(".png", "")]
             self.add(self.powerMenu[i])
-
-        #self.bitpattern.shuffleBits()
-        # #create the menu for powerups.
-        # menu = cocos.menu.Menu()
-        # positions = []
-        # itemSize = self.w/3
-        # for i in xrange(3):
-        #     positions.append((itemSize/2 + i*itemSize, 48/2))
-        # print positions
-        # layout_func = cocos.menu.fixedPositionMenuLayout(positions)
-        # l = []
-        # l.append(cocos.menu.ImageMenuItem('AutoCorrect.png', self.resetGame))
-        # l.append(cocos.menu.ImageMenuItem('BitAndOrder.png', self.resetGame))
-        # l.append(cocos.menu.ImageMenuItem('BitBlast.png', self.resetGame))
-        # menu.create_menu(l, cocos.menu.zoom_in(), cocos.menu.zoom_out(), cocos.menu.shake(), layout_func)
-        # self.add(menu)
 
         self.schedule(self.update)
 
@@ -127,7 +72,7 @@ class GamePlay(cocos.layer.Layer):
         self.successCounter = 0
         self.isAnimating = False
         self.score = 0
-        self.startMutation = 0
+        self.startMutation = False
         self.isGameOver = False
         self.genLimit = 10
         self.delayTime = 1
@@ -138,21 +83,27 @@ class GamePlay(cocos.layer.Layer):
     def generateNextPattern(self):
         if self.isGameOver:
             return
-        self.currentTarget = random.randrange(0, self.genLimit)
+
+        newValue = random.randrange(0, self.genLimit)
+        #ensure we dont' see the same number one after the other.
+        if newValue == self.currentTarget:
+            newValue += 1
+        self.currentTarget = newValue
+
         self.label.element.text = "Return: " + str(self.currentTarget)
         self.bitpattern = pattern.BitPattern(GamePlay.BitPatternSize)
 
-        if self.startMutation and random.choice([0, 0, 1]):
+        if self.startMutation and random.choice([0, 1]):
             self.bitpattern.shuffleBits()
-            self.startMutation -= 1
+
             #show a message that indicates that a powerup has been launched.
             mutationmsg = createLabel("Bit Mutation Detected", 18, (255, 0, 0, 255))
             mutationmsg.position = self.w/2, self.h/2 + 72
-            mutationmsg.do(cocos.actions.Blink(2, 1) +
-                          cocos.actions.FadeOut(0.5) + cocos.actions.CallFunc(mutationmsg.kill))
-            self.add(mutationmsg, 2)
+            mutationmsg.do(cocos.actions.Blink(2, 2) +
+                          cocos.actions.FadeOut(1) + cocos.actions.CallFunc(mutationmsg.kill))
+            self.add(mutationmsg, 1)
 
-        self.add(self.bitpattern)
+        self.add(self.bitpattern, 0)
         move = cocos.actions.MoveBy((0, -self.bitSize), 0.5)
         delay = cocos.actions.Delay(self.delayTime)
         seq = cocos.actions.sequence(move, delay)
@@ -201,14 +152,12 @@ class GamePlay(cocos.layer.Layer):
 
         #decrement the time for every 10 correct answers.
         if(self.successCounter % 10 == 0):
-            self.delayTime -= 0.1
-
-            #start the mutation gameplay as well.
-            self.startMutation = self.successCounter % 10;
-
-            #TODO decide when to shuffle the bits.
+            #decrease the hold time by 0.1 after every 10 successful attempts.
+            self.delayTime -= 0.05
             if self.delayTime < 0.5:
                 self.delayTime = 0.5
+            #start the mutation gameplay as well.
+            self.startMutation = True
 
 
         self.updateScoreText()
@@ -237,7 +186,6 @@ class GamePlay(cocos.layer.Layer):
         self.add(cl)
 
     def showResults(self):
-        #TODO use same scene or different one for results
         print self.multiplier
         print self.score
         print self.successCounter
@@ -248,6 +196,30 @@ class GamePlay(cocos.layer.Layer):
                              'CpuCycles: ', self.successCounter * self.maxMultiplier])
         s = cocos.scene.Scene(r)
         director.replace(TurnOffTilesTransition(s))
+
+    def updateInventory(self):
+        for pup in self.powerMenu:
+            gamelib.Inventory.data['userdata'][pup.file_name.replace(".png","")] = pup.count
+        gamelib.Inventory.data['userdata']['CpuCycles'] += self.successCounter * self.maxMultiplier
+        gamelib.Inventory.save()
+
+    def handleGameOver(self):
+        print "GameOver"
+        self.isGameOver = True
+        self.bitpattern.stop()
+        self.unschedule(self.update)
+
+        #set the user data values for the inventory.
+        self.updateInventory()
+
+        errormsg = createLabel("Fatal: too many errors")
+        errormsg.position = self.w/2, self.h/2
+        self.add(errormsg, 2)
+        errormsg = createLabel("Program Terminated")
+        errormsg.position = self.w/2, self.h/2-25
+        self.add(errormsg, 2)
+        errormsg.do(cocos.actions.Delay(0.2) + cocos.actions.Blink(2, 1))
+        self.do(cocos.actions.Delay(1.5) + cocos.actions.CallFunc(self.showResults))
 
     def update(self, dt):
         #if we are animating something we do not want the update checks.
@@ -268,20 +240,9 @@ class GamePlay(cocos.layer.Layer):
             self.bitpattern.do(cocos.actions.Delay(0.3) + cocos.actions.CallFuncS(self.remove))
             self.showMessage("TIMEOUT!!", (255, 0, 0, 255))
 
+        #the white lines have reached top of screen. It's game over :(
         if(self.stackHeight > self.h - self.bitSize):
-            print "GameOver"
-            self.isGameOver = True
-            self.bitpattern.stop()
-            self.unschedule(self.update)
-            errormsg = createLabel("Fatal: too many errors")
-            errormsg.position = self.w/2, self.h/2
-            self.add(errormsg, 2)
-            errormsg = createLabel("Program Terminated")
-            errormsg.position = self.w/2, self.h/2-25
-            self.add(errormsg, 2)
-            errormsg.do(cocos.actions.Delay(0.2) + cocos.actions.Blink(2, 1))
-            self.do(cocos.actions.Delay(1.5) + cocos.actions.CallFunc(self.showResults))
-
+            self.handleGameOver()
 
         elif self.isPatternFinished():
             #increment the score

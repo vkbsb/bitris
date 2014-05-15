@@ -1,6 +1,16 @@
 from cocos.particle_systems import *
 from cocos.particle import *
 from cocos.actions import *
+import cocos
+
+
+def createLabel(msg, fontsize = 18, color = (255, 0, 0, 255)):
+    errormsg = cocos.text.Label(msg,
+                        font_name='Nokia Cellphone',
+                         font_size=fontsize,
+                         anchor_x='center', anchor_y='center')
+    errormsg.element.color = color
+    return errormsg
 
 class SuccessExplosion(Explosion):
     def __init__(self, start_color=Color(0, 1, 0, 1), end_color=Color(1,1,1,0)):
