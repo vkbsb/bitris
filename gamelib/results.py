@@ -32,9 +32,8 @@ class Results(cocos.layer.Layer):
         menu.font_item_selected['font_size'] = 30
 
         l = []
-        l.append(cocos.menu.MenuItem("NEXT"), self.nextClicked)
-        menu.create_menu(l, None, cocos.menu.zoom_out(), cocos.menu.shake())
-        menu.position = w/2, 100
+        l.append(cocos.menu.MenuItem("NEXT", self.nextClicked))
+        menu.create_menu(l, cocos.menu.zoom_in(), cocos.menu.zoom_out(), cocos.menu.shake())
 
         self.add(menu)
 

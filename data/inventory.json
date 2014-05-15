@@ -1,16 +1,1 @@
-{"userdata": {"ByteBlast": 2, "BitAndOrder": 0, "CpuCycles": 112, "AutoByte": 1},
-"gameconfig": {
-"BitAndOrder": {
- "cost" : 40,
- "info" : "Re-Orders' bits in a Byte"
-},
-"ByteBlast": {
-    "cost": 30,
-    "info": "System ignores the Byte"
-},
-"AutoByte":{
-    "cost" : 50,
-    "info" : "Returns correct Answer"
-}
-}
-}
+{"userdata": {"ByteBlast": 2, "AutoByte": 1, "CpuCycles": 112, "BitAndOrder": 0}, "gameconfig": {"ByteBlast": {"info": "System ignores the Byte", "cost": 30}, "AutoByte": {"info": "Returns correct Answer", "cost": 50}, "BitAndOrder": {"info": "Re-Orders' bits in a Byte", "cost": 40}}}

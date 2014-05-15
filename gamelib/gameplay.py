@@ -59,6 +59,7 @@ class GamePlay(cocos.layer.Layer):
             self.powerMenu[i].count = gamelib.Inventory.data['userdata'][self.powerMenu[i].file_name.replace(".png", "")]
             self.add(self.powerMenu[i])
 
+
         self.schedule(self.update)
 
     def updateScoreText(self):
@@ -297,6 +298,7 @@ class GamePlay(cocos.layer.Layer):
                 item.scale = 0.8
 
     def on_mouse_press(self, x, y, buttons, modifiers):
+        self.showResults()
         if self.isGameOver or self.isAnimating:
             pass
         else:
