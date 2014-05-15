@@ -1,5 +1,6 @@
 import cocos
 from cocos.director import director
+import mainmenu
 
 class Results(cocos.layer.Layer):
     def __init__(self, dic = ['test', 1, 'test2', 3]):
@@ -22,3 +23,27 @@ class Results(cocos.layer.Layer):
             i += 2
             self.add(keymsg)
             self.add(valuemsg)
+
+        menu = cocos.menu.Menu()
+        #configure the menu font.
+        menu.font_item['font_name'] = 'Nokia Cellphone'
+        menu.font_item['font_size'] = 22
+        menu.font_item_selected['font_name'] = 'Nokia Cellphone'
+        menu.font_item_selected['font_size'] = 30
+
+        l = []
+        l.append(cocos.menu.MenuItem("NEXT"), self.nextClicked)
+        menu.create_menu(l, None, cocos.menu.zoom_out(), cocos.menu.shake())
+        menu.position = w/2, 100
+
+        self.add(menu)
+
+    def nextClicked(self):
+            # We create a new layer, an instance of HelloWorld
+        hello_layer = mainmenu.MainMenu() #gameplay.GamePlay()
+
+        # A scene that contains the layer hello_layer
+        main_scene = cocos.scene.Scene (hello_layer)
+
+        # And now, start the application, starting with main_scene
+        cocos.director.director.run (main_scene)
