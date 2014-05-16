@@ -113,6 +113,7 @@ class GamePlay(cocos.layer.Layer):
         #keep showing zero till the user gets' one thing right.
         if self.successCounter == 0:
             self.currentTarget = 0
+            self.label.element.text = "Return: " + str(self.currentTarget)
             hint = createLabel('Click to Toggle', 10, (255, 255, 255, 255));
             hint.position = self.w/2, self.bitSize + 5
             self.bitpattern.add(hint)
