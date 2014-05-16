@@ -10,12 +10,16 @@ class MainMenu(cocos.layer.Layer):
     def __init__(self):
         super(MainMenu, self).__init__()
 
-        self.infoShown = 0
+        self.infoShown = -1
         (w, h) = director.get_window_size()
 
         title = createLabel('BITRIS', 32, (255, 255, 255, 255))
         title.position = w/2, h-32
         self.add(title)
+
+        heading = createLabel('POWERUPS', 15, (0, 0, 255, 255))
+        heading.position = w/2, h-150
+        self.add(heading)
 
         self.cycles = createLabel('<>' + str(Inventory.data['userdata']['CpuCycles']), 15, (0, 0, 255, 255))
         self.cycles.element.anchor_x = 'left'
@@ -39,7 +43,7 @@ class MainMenu(cocos.layer.Layer):
         i = 0
         for position in positions:
             pup = Inventory.data['gameconfig'][self.arr[i]]
-            costLabel = createLabel("<>" + str(pup['cost']), 18, (0, 0, 255, 255))
+            costLabel = createLabel("<>" + str(pup['cost']), 15, (0, 0, 255, 255))
             costLabel.position = position[0]-itemSize/2 + i*itemSize/2, h/2 - itemSize/4
             self.add(costLabel)
 
@@ -53,8 +57,8 @@ class MainMenu(cocos.layer.Layer):
         #add position for the play button.
         positions.append((w/2, itemSize/2))
 
-        pup = Inventory.data['gameconfig'][self.arr[self.infoShown]]
-        self.infoLabel = createLabel(pup['info'], 15, (255, 255, 255, 255))
+        #pup = Inventory.data['gameconfig'][self.arr[self.infoShown]]
+        self.infoLabel = createLabel('', 15, (0, 0, 255, 255))
         self.infoLabel.position = w/2, h/2 - itemSize/2
         self.add(self.infoLabel)
 
@@ -93,28 +97,44 @@ class MainMenu(cocos.layer.Layer):
 
 
     def playClicked(self):
-        print "Play Clicked"
+        #save the inventory to ensure the buy's are not lost
+        Inventory.save()
+
         game = gameplay.GamePlay()
         # A scene that contains the layer hello_layer
         main_scene = cocos.scene.Scene (game)
         # And now, start the application, starting with main_scene
         director.replace(main_scene)
 
+    def showTip(self):
+        (w, h) = director.get_window_size()
+        label = createLabel('Click again to buy.', 10, (255, 255, 255, 0))
+        label.position = w/2, h-170
+        label.do(cocos.actions.FadeIn(0.5) + cocos.actions.Delay(1) +
+                 cocos.actions.FadeOut(0.5) + cocos.actions.CallFunc(label.kill))
+        self.add(label)
+
     def abClicked(self):
         #the user already knows that he is buying this. now buy.
         if self.infoShown == 0:
             self.buyPowerUp(self.arr[self.infoShown])
+        else:
+            self.showTip()
         self.infoShown = 0
         self.updateInfoLabel()
 
     def baoClicked(self):
         if self.infoShown == 1:
             self.buyPowerUp(self.arr[self.infoShown])
+        else:
+            self.showTip()
         self.infoShown = 1
         self.updateInfoLabel()
 
     def bbClicked(self):
         if self.infoShown == 2:
             self.buyPowerUp(self.arr[self.infoShown])
+        else:
+            self.showTip()
         self.infoShown = 2
         self.updateInfoLabel()

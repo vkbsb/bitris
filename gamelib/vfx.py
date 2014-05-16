@@ -1,7 +1,34 @@
 from cocos.particle_systems import *
 from cocos.particle import *
 from cocos.actions import *
+from cocos.text import *
+from cocos.layer import Layer
 import cocos
+
+
+class MessageLayer( Layer ):
+    def show_message( self, msg, callback=None ):
+
+        w,h = director.get_window_size()
+
+        self.msg = Label( msg,
+            font_size=24,
+            font_name='Nokia Cellphone',
+            anchor_y='center',
+            anchor_x='center' )
+        self.msg.position=(w, h/2)
+
+        self.add( self.msg )
+
+        actions = Accelerate(MoveBy( (-w/2,0), duration=0.5)) + \
+                    Delay(2) +  \
+                    Accelerate(MoveBy( (-w/2, 0), duration=0.5)) + \
+                    Hide()
+
+        if callback:
+            actions += CallFunc( callback )
+
+        self.msg.do( actions )
 
 
 def createLabel(msg, fontsize = 18, color = (255, 0, 0, 255)):

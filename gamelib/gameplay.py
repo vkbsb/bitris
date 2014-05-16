@@ -58,8 +58,6 @@ class GamePlay(cocos.layer.Layer):
             self.powerMenu[i].position = itemSize/2 + i*itemSize, 72/2
             self.powerMenu[i].count = gamelib.Inventory.data['userdata'][self.powerMenu[i].file_name.replace(".png", "")]
             self.add(self.powerMenu[i])
-
-
         self.schedule(self.update)
 
     def updateScoreText(self):
@@ -104,6 +102,13 @@ class GamePlay(cocos.layer.Layer):
                           cocos.actions.FadeOut(1) + cocos.actions.CallFunc(mutationmsg.kill))
             self.add(mutationmsg, 1)
 
+        #keep showing zero till the user gets' one thing right.
+        if self.successCounter == 0:
+            self.currentTarget = 0
+            hint = createLabel('Click to Toggle', 10, (255, 255, 255, 255));
+            hint.position = self.w/2, self.bitSize + 5
+            self.bitpattern.add(hint)
+
         self.add(self.bitpattern, 0)
         move = cocos.actions.MoveBy((0, -self.bitSize), 0.5)
         delay = cocos.actions.Delay(self.delayTime)
@@ -140,7 +145,6 @@ class GamePlay(cocos.layer.Layer):
         if node:
             node.do(cocos.actions.FadeOut(0.5) + cocos.actions.CallFuncS(self.remove))
         # successcounter
-        self.successCounter += 1
         self.multiplier += 1
 
         #track the max multiplier that the user had achieved during gameplay.
@@ -159,8 +163,6 @@ class GamePlay(cocos.layer.Layer):
                 self.delayTime = 0.5
             #start the mutation gameplay as well.
             self.startMutation = True
-
-
         self.updateScoreText()
 
     def showMessage(self, msg, color=(0, 0, 0, 255), isError = True):
@@ -194,7 +196,7 @@ class GamePlay(cocos.layer.Layer):
                              'Score: ', self.score,
                              'Success: ', self.successCounter,
                              '---------', '--------',
-                             'CpuCycles: ', self.successCounter * self.maxMultiplier])
+                             'CpuCycles: <>', self.successCounter * self.maxMultiplier])
         s = cocos.scene.Scene(r)
         director.replace(TurnOffTilesTransition(s))
 
@@ -248,6 +250,8 @@ class GamePlay(cocos.layer.Layer):
         elif self.isPatternFinished():
             #increment the score
             self.score += self.multiplier * (self.BitPatternSize - self.bitpattern.getNumBitsOn())
+            self.successCounter += 1
+
             #remove the old bit pattern.
             self.bitpattern.stop()
             self.bitpattern.do(cocos.actions.Delay(0.3) + cocos.actions.CallFuncS(self.remove))
@@ -298,7 +302,6 @@ class GamePlay(cocos.layer.Layer):
                 item.scale = 0.8
 
     def on_mouse_press(self, x, y, buttons, modifiers):
-        self.showResults()
         if self.isGameOver or self.isAnimating:
             pass
         else:

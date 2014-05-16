@@ -33,12 +33,12 @@ class Results(cocos.layer.Layer):
 
         l = []
         l.append(cocos.menu.MenuItem("NEXT", self.nextClicked))
-        menu.create_menu(l, cocos.menu.zoom_in(), cocos.menu.zoom_out(), cocos.menu.shake())
+        menu.create_menu(l, None, cocos.menu.zoom_in(), cocos.menu.shake())
 
         self.add(menu)
 
-    def nextClicked(self):
-            # We create a new layer, an instance of HelloWorld
+    def goHome(self):
+        # We create a new layer, an instance of HelloWorld
         hello_layer = mainmenu.MainMenu() #gameplay.GamePlay()
 
         # A scene that contains the layer hello_layer
@@ -46,3 +46,7 @@ class Results(cocos.layer.Layer):
 
         # And now, start the application, starting with main_scene
         cocos.director.director.run (main_scene)
+
+    def nextClicked(self):
+        if not self.are_actions_running():
+            self.do(cocos.actions.Delay(1) + cocos.actions.CallFunc(self.goHome))
