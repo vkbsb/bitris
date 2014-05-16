@@ -128,3 +128,5 @@ class BitPattern(cocos.layer.Layer):
             y_in_node = y-self.y
             if self.bits[i].isPointInside(x_in_node, y_in_node):
                 self.toggleBit(i)
+                return True
+        return False

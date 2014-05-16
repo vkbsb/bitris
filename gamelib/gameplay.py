@@ -17,6 +17,14 @@ class GamePlay(cocos.layer.Layer):
     BitPatternSize = 8
     def __init__(self):
         super(GamePlay, self).__init__()
+
+        self.sound_effects = {}
+        self.sound_effects['click'] = pyglet.media.load(data.filepath('click.wav'), streaming=False)
+        self.sound_effects['error'] = pyglet.media.load(data.filepath('error.wav'), streaming=False)
+        self.sound_effects['explode'] = pyglet.media.load(data.filepath('explode.wav'), streaming=False)
+        self.sound_effects['powerup'] = pyglet.media.load(data.filepath('powerup.wav'), streaming=False)
+        self.sound_effects['ok'] = pyglet.media.load(data.filepath('success.wav'), streaming=False)
+
         # a cocos.text.Label is a wrapper of pyglet.text.Label
         # with the benefit of being a cocosnode
         self.label = createLabel('Hello, World!', 20, (255, 255, 255, 255))
@@ -235,6 +243,7 @@ class GamePlay(cocos.layer.Layer):
             self.bitpattern.stop()
             self.bitpattern.do(cocos.actions.Delay(0.3) + cocos.actions.CallFuncS(self.remove))
             self.showMessage("ERROR", (255, 0, 0, 255))
+            self.sound_effects['error'].play()
             return
 
         # when the pattern has reached bottom of screen.
@@ -242,6 +251,8 @@ class GamePlay(cocos.layer.Layer):
             self.bitpattern.stop()
             self.bitpattern.do(cocos.actions.Delay(0.3) + cocos.actions.CallFuncS(self.remove))
             self.showMessage("TIMEOUT!!", (255, 0, 0, 255))
+            self.sound_effects['error'].play()
+
 
         #the white lines have reached top of screen. It's game over :(
         if(self.stackHeight > self.h - self.bitSize):
@@ -256,6 +267,7 @@ class GamePlay(cocos.layer.Layer):
             self.bitpattern.stop()
             self.bitpattern.do(cocos.actions.Delay(0.3) + cocos.actions.CallFuncS(self.remove))
             self.showMessage("SUCCESS!", (0, 255, 0, 255), False)
+            self.sound_effects['ok'].play()
             #add a couple of explosions for effect.
             explosion = SuccessExplosion()
             explosion.position = (self.bitSize, self.bitpattern.y + self.bitSize/2)
@@ -308,8 +320,10 @@ class GamePlay(cocos.layer.Layer):
             #handle the mouse click to activate the powerup.
             for item in self.powerMenu:
                 if item.contains(x, y):
+                    self.sound_effects['powerup'].play()
                     item.activate()
 
             self.posx, self.posy = director.get_virtual_coordinates(x, y)
             #make the bits toggle when the mouse is clicked.
-            self.bitpattern.handleClick(x, y)
+            if self.bitpattern.handleClick(x, y):
+                self.sound_effects['click'].play()

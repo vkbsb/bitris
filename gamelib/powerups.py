@@ -45,8 +45,9 @@ def ByteBlaster( bitpattern ):
         se = SuccessExplosion(Color(r, g, b, a))
         se.position = bitpattern.bits[i].x, bitpattern.y + 32
         bitpattern.parent.add(se, 2)
-
     parent = bitpattern.parent
+    parent.sound_effects['explode'].play()
+
     bitpattern.kill()
     #toggles the isAnimating flag used to disable touch.
     parent.do(cocos.actions.Delay(0.5) + cocos.actions.CallFunc(parent.handleSuccess))

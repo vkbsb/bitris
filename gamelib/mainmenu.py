@@ -10,6 +10,13 @@ class MainMenu(cocos.layer.Layer):
     def __init__(self):
         super(MainMenu, self).__init__()
 
+        #play the bg
+        music = pyglet.resource.media('Variable-Joshua_H-10424_hifi.mp3', streaming=True)
+        player = pyglet.media.Player()
+        player.eos_action = pyglet.media.Player.EOS_LOOP
+        player.queue(music)
+        player.play()
+
         self.infoShown = -1
         (w, h) = director.get_window_size()
 
