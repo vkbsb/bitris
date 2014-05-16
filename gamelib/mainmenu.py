@@ -64,6 +64,12 @@ class MainMenu(cocos.layer.Layer):
         #add position for the play button.
         positions.append((w/2, itemSize/2))
 
+        #show highscore
+        high_score = Inventory.data['userdata']['HighScore']
+        label = createLabel("HighScore: " + str(high_score), 10, (255, 255, 255, 255))
+        label.position = w/2, h-70
+        self.add(label)
+
         #pup = Inventory.data['gameconfig'][self.arr[self.infoShown]]
         self.infoLabel = createLabel('', 15, (0, 0, 255, 255))
         self.infoLabel.position = w/2, h/2 - itemSize/2

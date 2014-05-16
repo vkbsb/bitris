@@ -1,11 +1,14 @@
 import cocos
 from cocos.director import director
 import mainmenu
+from gamelib import Inventory
+from vfx import *
 
 class Results(cocos.layer.Layer):
-    def __init__(self, dic = ['test', 1, 'test2', 3]):
+    def __init__(self, dic = ['test', 1, 'Score: ', 3]):
         super(Results, self).__init__()
         (w,h) = director.get_window_size()
+        high_score = Inventory.data['userdata']['HighScore']
         i = 0
         for key in xrange(len(dic)/2):
             keymsg = cocos.text.Label(dic[i],
@@ -13,6 +16,14 @@ class Results(cocos.layer.Layer):
                          font_size=18,
                          anchor_x='right', anchor_y='center')
             keymsg.position = w/2, h - (i+5)*10
+
+            #check if this is highscore
+            if dic[i] == "Score: " and dic[i+1] > high_score:
+                Inventory.data['userdata']['HighScore'] = dic[i+1]
+                Inventory.save()
+                msg_layer = MessageLayer()
+                msg_layer.show_message("New High Score!!")
+                self.add(msg_layer)
 
             valuemsg =  cocos.text.Label(str(dic[i+1]),
                         font_name='Nokia Cellphone',
@@ -34,7 +45,7 @@ class Results(cocos.layer.Layer):
         l = []
         l.append(cocos.menu.MenuItem("NEXT", self.nextClicked))
         menu.create_menu(l, None, cocos.menu.zoom_in(), cocos.menu.shake())
-
+        menu.position = 0, -h/4
         self.add(menu)
 
     def goHome(self):

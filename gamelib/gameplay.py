@@ -315,6 +315,11 @@ class GamePlay(cocos.layer.Layer):
                 item.scale = 0.8
 
     def on_mouse_press(self, x, y, buttons, modifiers):
+        #debug stuff
+        #self.score = 10
+        #self.showResults()
+        #end debug stuff
+
         if self.isGameOver or self.isAnimating:
             pass
         else:
